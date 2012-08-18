@@ -1,0 +1,24 @@
+{
+	"cards": {
+		"Realtek": {
+			"ports": [
+				{
+					"type": "Ethernet"
+				},
+				{
+					"type": "FastEthernet"
+				}
+			]
+		},
+		"E2000": {
+			"ports": {
+				"type": "Ethernet"
+			}
+		},
+		"E2100": {
+			"ports": {
+				"type": "FastEthernet"
+			}
+		}
+	}
+}

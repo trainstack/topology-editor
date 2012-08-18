@@ -1,0 +1,34 @@
+{
+	"devices": [
+		{
+			"name": "R1",
+			"slots": [
+				{
+					"id": 0,
+					"model": "E2000"
+				},
+				{
+					"id": 1,
+					"model": "E2100"
+				},
+				{
+					"id": 3,
+					"model": null
+				}
+			],
+			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/R1.html"
+		},
+		{
+			"name": "M1",
+			"slots": [
+				{
+					"id": 0,
+					"model": "Realtek"
+				}
+			],
+			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/M1.html"
+		}
+	],
+	"wires": [
+	]
+}
