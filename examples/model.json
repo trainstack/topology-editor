@@ -2,28 +2,34 @@
 	"devices": [
 		{
 			"name": "R1",
+			"hardware": "C2000",
 			"slots": [
 				{
 					"id": 0,
-					"model": "E2000"
+					"model": "S2000",
+					"editable": false
 				},
 				{
 					"id": 1,
-					"model": "E2100"
+					"model": "E2100",
+					"editable": true
 				},
 				{
 					"id": 3,
-					"model": null
+					"model": null,
+					"editable": true
 				}
 			],
 			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/R1.html"
 		},
 		{
 			"name": "M1",
+			"hardware": "VM",
 			"slots": [
 				{
 					"id": 0,
-					"model": "Realtek"
+					"model": "Realtek",
+					"editable": true
 				}
 			],
 			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/M1.html"
