@@ -11,7 +11,7 @@
 				{
 					"id": 0,
 					"model": "Realtek",
-					"editable": true
+					"editable": false
 				}
 			]
 		},
