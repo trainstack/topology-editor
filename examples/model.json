@@ -1,7 +1,8 @@
 {
 	"devices": [
 		{
-			"name": "R1",
+			"id": "R1",
+			"name": "Router 1",
 			"hardware": "C2000",
 			"slots": [
 				{
@@ -20,19 +21,28 @@
 					"editable": true
 				}
 			],
-			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/R1.html"
+			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/R1.html",
+			"position": {
+				"x": 123,
+				"y": 100
+			}
 		},
 		{
-			"name": "M1",
+			"id": "R2",
+			"name": "Computer",
 			"hardware": "VM",
 			"slots": [
 				{
 					"id": 0,
 					"model": "Realtek",
-					"editable": true
+					"editable": false
 				}
 			],
-			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/M1.html"
+			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/M1.html",
+			"position": {
+				"x": 200,
+				"y": 200
+			}
 		}
 	],
 	"wires": [
