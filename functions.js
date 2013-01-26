@@ -1,10 +1,19 @@
+var hardware = null;
+var topology = null;
+//щелчки
+var buf = null;
+
+var config = {
+	api_endpoint: '/examples/' // default for dev environment	
+};
+
 function parseJson(jsonString) {
 	return eval('(' + jsonString + ')');
 }
 
 function loadHardware(callback) {
 	var newXHR = new XMLHttpRequest();
-	newXHR.open('GET', 'hardware.json');
+	newXHR.open('GET', config.api_endpoint + 'hardware.json');
 	newXHR.onreadystatechange = function() {
 		if (newXHR.readyState == 4) {
 			var resp = parseJson(newXHR.responseText);
@@ -21,9 +30,6 @@ function loadTopology(callback) {
 	};
 	callback(mock);
 }
-
-var hardware = null;
-var topology = null
 
 function fillDevices(data) {
 	hardware = data; 
@@ -48,11 +54,6 @@ function fillTopology(data) {
 	topology = data;
 	// render data here...
 }
-
-
-
-// щелчки
-var buf = null;
 
 function wrapHandler(f) {
 	return function(e) {
