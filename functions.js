@@ -1,6 +1,7 @@
 var hardware = null;
 var topology = null;
 var buf = null;
+var menuevent = null;
 
 var config = {
 	api_endpoint: '/examples/' // default for dev environment
@@ -75,7 +76,8 @@ function newDevice() {
 	var devnum = id + 1;
 	var device = {
 			name: 'device ' + devnum, 
-			id: 'device_' + id 
+			id: 'device_' + id,
+			position:  {"x":-1, "y":-1}
 	};
     return device; 	
 }
@@ -96,6 +98,7 @@ function deviceAddFinish(ev, el) {
 	var div = document.createElement( "div" );
 	div.id = device.id;
 	div.className = 'constrdevice';
+	div.oncontextmenu = menuevent; 
      div._editorDevice = device;
         div.style.visibility = 'hidden';
 	div.innerHTML = '<img src="' 
@@ -107,6 +110,8 @@ function deviceAddFinish(ev, el) {
 	div.style.left = mouse_x - ((div.clientWidth)/2) + 'px';
 	div.style.top = mouse_y - ((sizer.clientHeight)/2) + 'px';
 	div.style.visibility = 'visible';
+	device.position.x = div.style.left;
+	device.position.y = div.style.top;
 	buf = null;
 }
 
@@ -127,7 +132,50 @@ function point(xcoord,ycoord){
 	return p;
 }
 
+//Функция для определения координат указателя мыши (для выпадающего меню)
+function defPosition(event) {
+      var x = y = 0;
+  	  var parent = document.getElementById("constructfield");
+  	  var x = event.clientX - parent.offsetLeft;
+	  var y = event.clientY - parent.offsetTop;
+      return {x:x, y:y};
+}
 
+//выпадающее меню при правом клике на устройство
+menuevent = function(event) {
+         event = event || window.event;
+         event.preventDefault ? event.preventDefault() : event.returnValue = false; 
+   		 var menu = document.getElementById("contextMenuId");
+   	     var html = "";
+   	     html = 'Переименовать';
+   	     html += '<br>Удалить';
+   	  if (html) {
+          menu.innerHTML = html;
+          menu.style.top = defPosition(event).y + 'px';
+          menu.style.left = defPosition(event).x + 'px';
+          menu.style.display = '';
+      }
+       };
+
+
+    
+ // Функция для добавления обработчиков событий, связанных с выпадающим меню
+    function addHandler(object, event, handler, useCapture) {
+        if (object.addEventListener) {
+            object.addEventListener(event, handler, useCapture ? useCapture : false);
+        } else if (object.attachEvent) {
+            object.attachEvent('on' + event, handler);
+        } else alert("Add handler is not supported");
+    }
+    addHandler(document, "contextmenu", function() {
+        document.getElementById("contextMenuId").style.display = "block";
+    });
+    addHandler(document, "click", function() {
+        document.getElementById("contextMenuId").style.display = "none";
+    });   
+        
+
+//вызов функций
 
 handleDeviceAddStart = wrapHandler(deviceAddStart);
 handleDeviceAddFinish = wrapHandler(deviceAddFinish);
