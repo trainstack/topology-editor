@@ -147,31 +147,38 @@ menuevent = function(event) {
          event.preventDefault ? event.preventDefault() : event.returnValue = false; 
    		 var menu = document.getElementById("contextMenuId");
    	     var html = "";
-   	     html = 'Переименовать';
-   	     html += '<br>Удалить';
+   	     html = '<form><input type=button name="removebutton" value="Переименовать" onClick="removeDevice"></form>';
+   	     html += '<form><input type=button name="removebutton" value="Удалить" onClick="removeDevice"></form>';
    	  if (html) {
           menu.innerHTML = html;
           menu.style.top = defPosition(event).y + 'px';
           menu.style.left = defPosition(event).x + 'px';
           menu.style.display = '';
+	  document.getElementById("contextMenuId").style.display = "block";
       }
-       };
+};
 
+//Удаление элемента
+function removeDevice() {
+  alert('Удаление');
+}
+
+//Переименование элемента
+function renameDevice() {
+  alert('Переименование');
+}
 
     
  // Функция для добавления обработчиков событий, связанных с выпадающим меню
-    function addHandler(object, event, handler, useCapture) {
-        if (object.addEventListener) {
-            object.addEventListener(event, handler, useCapture ? useCapture : false);
-        } else if (object.attachEvent) {
-            object.attachEvent('on' + event, handler);
-        } else alert("Add handler is not supported");
-    }
-    addHandler(document, "contextmenu", function() {
-        document.getElementById("contextMenuId").style.display = "block";
-    });
-    addHandler(document, "click", function() {
-        document.getElementById("contextMenuId").style.display = "none";
+   function addHandler(object, event, handler, useCapture) {
+       if (object.addEventListener) {
+           object.addEventListener(event, handler, useCapture ? useCapture : false);
+       } else if (object.attachEvent) {
+           object.attachEvent('on' + event, handler);
+       } else alert("Add handler is not supported");
+  }
+  addHandler(document, "click", function() {
+       document.getElementById("contextMenuId").style.display = "none";
     });   
         
 
