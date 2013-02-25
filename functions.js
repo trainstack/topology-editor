@@ -144,6 +144,7 @@ function newDevice(proto) {
     for (var k in slots.cards) {
       if (slots.cards[k].model == buf.slots[i].model) {
         for (var n = 0; n < slots.cards[k].ports.length; n++ ) {
+          portsArray = [];
           for (var m = 0; m < slots.cards[k].ports[n].count; m++) {
                portsArray[m] = {
                type: slots.cards[k].ports[n].type,
@@ -155,7 +156,7 @@ function newDevice(proto) {
               id: i,
               model: buf.slots[i].model,
               ports: portsArray
-            }
+              }
           }
         } 
       }
@@ -246,6 +247,7 @@ menuevent = function(event) {
       var menu = document.getElementById("contextMenuId");
       var html = "";
       for (var i in necessaryDevice.slots) {
+        portsList = '';
         for (var m in necessaryDevice.slots[i].ports) {
           portsList += '<li>' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</li>';
         }
