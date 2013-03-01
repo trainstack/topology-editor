@@ -9,19 +9,9 @@ body {font:11px/1.5 Verdana, Arial, Helvetica, sans-serif; background:#FFF}
 #ttbot {display:block; height:5px; margin-left:5px; background:url(images/tt_bottom.gif) top right no-repeat; overflow:hidden}
 
 #devices {
-background-color: cfecfe;
--webkit-border-radius: 10px;
--moz-border-radius: 10px;   
-border-radius:10px;            
-border:5px outset #cfecfe;
 padding:10px; 
 text-align:center;
 vertical-align:middle;
-font-variant:small-caps;
-font-weight:bold;
-Font-size: 14;
-color:#2F4F4F;
-text-shadow:0px 0px 7px #68838B;
 cursor: pointer;
 
 } 
@@ -32,25 +22,14 @@ float: right;
 width: 77%;
 text-align: center;
 height: 100%;
-background-color: cfecfe;
--webkit-border-radius: 10px;
--moz-border-radius: 10px;   
-border-radius:10px;            
-border:5px outset #cfecfe;
-padding:10px; 
 vertical-align:top;
-font-variant:small-caps;
-font-weight:bold;
-Font-size: 14;
-color:#2F4F4F;
-text-shadow:0px 0px 7px #68838B;
-cursor: pointer;
-
+padding:10px;
+border:2px inset #eeeeee;
 } 
 
-.constrdevice {position:absolute; text-align: center;} 
-.palette_icon {height: 64; width: 64}
-.editor_icon {height: 32; width: 32}
+.constrdevice {position:absolute; text-align: center; z-index: 100;} 
+.palette_icon {height: 32; width: 32}
+.editor_icon {height: 64; width: 64}
 
 .menu {
  position: absolute;
@@ -71,9 +50,9 @@ cursor: pointer;
 }
 
 #contextMenuId {
-position:absolute; 
-border:1px solid #666; 
-background-color:#CCC; 
+position:absolute;
 display:none; 
 float:left;
 }
+
+.drag { position:relative; cursor:hand; z-index: 100; } 

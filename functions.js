@@ -37,10 +37,10 @@ function fillDevices(data) {
 	var devicesList = document.getElementById('devices');
 	devicesList.deleteRow(0);
 	for ( var id in data.devices) {
-		var acc = '<div id=' + id + '><img src='
+		var acc = '<div id=' + id + ' style="text-align:center;"><img src='
 				+ data.devices[id].image.main.url + ' id=img_' + id + ' class="palette_icon" >'
-				+ '<br> <p id=p_' + id + '>' + data.devices[id].name
-				+ '</p> <br></div>';
+				+ '<p id=p_' + id + '>' + data.devices[id].name
+				+ '</p></div>';
 		var row = devicesList.insertRow(-1);
 		var cell = row.insertCell(0);
 		cell.innerHTML = acc;
@@ -75,7 +75,7 @@ function newDevice() {
 	var id = getFreeId();
 	var devnum = id + 1;
 	var device = {
-			name: 'device ' + devnum, 
+			name: 'Device ' + devnum, 
 			id: 'device_' + id,
 			position:  {"x":-1, "y":-1}
 	};
@@ -99,17 +99,18 @@ function deviceAddFinish(ev, el) {
 	div.id = device.id;
 	div.className = 'constrdevice';
 	div.oncontextmenu = menuevent; 
-     div._editorDevice = device;
+        div._editorDevice = device;
         div.style.visibility = 'hidden';
 	div.innerHTML = '<img src="' 
 	+ buf.image.main.url + '" class="editor_icon" id="img_' + device.id + '"/>'
-	+ '<br/> <p id="p_' + device.id + '">' + device.name
+	+ '<br/> <p id="p_' + device.id + '" class="js-device-name">' + device.name
 	+ '</p> <br/>';
 	parent.appendChild(div);
 	var sizer = div.childNodes.item("img_" + device.id);
 	div.style.left = mouse_x - ((div.clientWidth)/2) + 'px';
 	div.style.top = mouse_y - ((sizer.clientHeight)/2) + 'px';
 	div.style.visibility = 'visible';
+  div.onmousedown = divDrag(this);
 	device.position.x = div.style.left;
 	device.position.y = div.style.top;
 	buf = null;
@@ -143,29 +144,64 @@ function defPosition(event) {
 
 //выпадающее меню при правом клике на устройство
 menuevent = function(event) {
-         event = event || window.event;
-         event.preventDefault ? event.preventDefault() : event.returnValue = false; 
-   		 var menu = document.getElementById("contextMenuId");
-   	     var html = "";
-   	     html = '<form><input type=button name="removebutton" value="Переименовать" onClick="removeDevice"></form>';
-   	     html += '<form><input type=button name="removebutton" value="Удалить" onClick="removeDevice"></form>';
-   	  if (html) {
-          menu.innerHTML = html;
-          menu.style.top = defPosition(event).y + 'px';
-          menu.style.left = defPosition(event).x + 'px';
-          menu.style.display = '';
-	  document.getElementById("contextMenuId").style.display = "block";
-      }
+      event = event || window.event;
+      event.preventDefault ? event.preventDefault() : event.returnValue = false; 
+      var menu = document.getElementById("contextMenuId");
+      var html = "";
+      html = '<li><a tabindex="-1" href="#" class="js-get-html-rename"> Переименовать </a></li>';
+      html += '<br><li><a tabindex="-1" href="#" class="js-get-html-remove"> Удалить </a></li>';
+      menu.innerHTML = html;
+      $(".js-get-html-rename").on('click', function() {
+        console.log(event);
+        var parent = parentSearch(event.target);
+        renameDevice(parent);        
+      });
+      $(".js-get-html-remove").on('click', function() {
+        console.log(event);
+        var parent = parentSearch(event.target);
+        removeDevice(parent);
+      });      
+      menu.style.top = defPosition(event).y + 'px';
+      menu.style.left = defPosition(event).x + 'px';
+      menu.style.display = '';
+	   document.getElementById("contextMenuId").style.display = "block";
 };
 
-//Удаление элемента
-function removeDevice() {
-  alert('Удаление');
-}
 
 //Переименование элемента
-function renameDevice() {
-  alert('Переименование');
+function renameDevice(elem) {
+      var div = $(elem);
+      var p = div.find("p");
+      p.hide();
+      p.after(
+          "<input type='text' class='js-edit' style='width: 96; height: 28;'>"
+      );
+      var edit = div.find(".js-edit");
+      edit.keydown(function(e) {   
+          console.log(e.keyCode);     
+          if (e.keyCode == 13) {
+              e.preventDefault();
+              p.text(edit.val());           
+              edit.remove();
+              p.show();
+          }
+      });
+}
+
+//Удаление элемента
+function removeDevice(elem) {
+  return elem.parentNode ? elem.parentNode.removeChild(elem) : elem;
+}
+
+//Поиск "родителя"
+function parentSearch(node) {
+  for (var realParent = node; realParent.className !="constrdevice"; realParent = realParent.parentNode);
+  return realParent;
+}
+
+//Перетаскивание div'а
+function divDrag(){
+  alert('Works!');
 }
 
     
