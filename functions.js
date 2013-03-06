@@ -1,7 +1,10 @@
-var hardware = null;
+п»їvar hardware = null;
 var topology = null;
 var buf = null;
 var menuevent = null;
+var dragObject = null;
+var mainfield = null;  
+
 
 var config = {
 	api_endpoint: '/examples/' // default for dev environment
@@ -63,7 +66,7 @@ function wrapHandler(f) {
 	};
 }
 
-//конуструтор
+//РєРѕРЅСѓСЃС‚СЂСѓС‚РѕСЂ
 function getFreeId(){
 	for (var i=0; i<100; i++) {
 		if (!document.getElementById('device_' + i)) break; 
@@ -82,7 +85,7 @@ function newDevice() {
     return device; 	
 }
 
-//щелчки 
+//С‰РµР»С‡РєРё 
 
 function deviceAddStart(ev, el) {
 	var elid = el.id;
@@ -101,22 +104,25 @@ function deviceAddFinish(ev, el) {
 	div.oncontextmenu = menuevent; 
         div._editorDevice = device;
         div.style.visibility = 'hidden';
-	div.innerHTML = '<img src="' 
-	+ buf.image.main.url + '" class="editor_icon" id="img_' + device.id + '"/>'
-	+ '<br/> <p id="p_' + device.id + '" class="js-device-name">' + device.name
-	+ '</p> <br/>';
-	parent.appendChild(div);
-	var sizer = div.childNodes.item("img_" + device.id);
-	div.style.left = mouse_x - ((div.clientWidth)/2) + 'px';
-	div.style.top = mouse_y - ((sizer.clientHeight)/2) + 'px';
-	div.style.visibility = 'visible';
-  div.onmousedown = divDrag(this);
+	if (buf != null) {
+    div.innerHTML = '<img src="' 
+	 + buf.image.main.url + '" class="editor_icon" id="img_' + device.id + '"/>'
+	 + '<br/> <p id="p_' + device.id + '" class="js-device-name">' + device.name
+	 + '</p> <br/>';
+	 parent.appendChild(div);
+	 var sizer = div.childNodes.item("img_" + device.id);
+	 div.style.left = mouse_x - ((div.clientWidth)/2) + 'px';
+	 div.style.top = mouse_y - ((sizer.clientHeight)/2) + 'px';
+	 div.style.visibility = 'visible';
+  }
+  div.onmousedown = divDragStart(div);
+  div.onmouseup = divDragFinish(div);
 	device.position.x = div.style.left;
 	device.position.y = div.style.top;
 	buf = null;
 }
 
-// координаты
+// РєРѕРѕСЂРґРёРЅР°С‚С‹
 function point(xcoord,ycoord){
 	var p = {
 			x: xcoord,
@@ -133,23 +139,23 @@ function point(xcoord,ycoord){
 	return p;
 }
 
-//Функция для определения координат указателя мыши (для выпадающего меню)
+//Р¤СѓРЅРєС†РёСЏ РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РєРѕРѕСЂРґРёРЅР°С‚ СѓРєР°Р·Р°С‚РµР»СЏ РјС‹С€Рё (РґР»СЏ РІС‹РїР°РґР°СЋС‰РµРіРѕ РјРµРЅСЋ)
 function defPosition(event) {
       var x = y = 0;
   	  var parent = document.getElementById("constructfield");
   	  var x = event.clientX - parent.offsetLeft;
-	  var y = event.clientY - parent.offsetTop;
+	    var y = event.clientY - parent.offsetTop;
       return {x:x, y:y};
 }
 
-//выпадающее меню при правом клике на устройство
+//РІС‹РїР°РґР°СЋС‰РµРµ РјРµРЅСЋ РїСЂРё РїСЂР°РІРѕРј РєР»РёРєРµ РЅР° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ
 menuevent = function(event) {
       event = event || window.event;
       event.preventDefault ? event.preventDefault() : event.returnValue = false; 
       var menu = document.getElementById("contextMenuId");
       var html = "";
-      html = '<li><a tabindex="-1" href="#" class="js-get-html-rename"> Переименовать </a></li>';
-      html += '<br><li><a tabindex="-1" href="#" class="js-get-html-remove"> Удалить </a></li>';
+      html = '<li><a tabindex="-1" href="#" class="js-get-html-rename"> РџРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ </a></li>';
+      html += '<br><li><a tabindex="-1" href="#" class="js-get-html-remove"> РЈРґР°Р»РёС‚СЊ </a></li>';
       menu.innerHTML = html;
       $(".js-get-html-rename").on('click', function() {
         console.log(event);
@@ -168,7 +174,7 @@ menuevent = function(event) {
 };
 
 
-//Переименование элемента
+//РџРµСЂРµРёРјРµРЅРѕРІР°РЅРёРµ СЌР»РµРјРµРЅС‚Р°
 function renameDevice(elem) {
       var div = $(elem);
       var p = div.find("p");
@@ -188,24 +194,39 @@ function renameDevice(elem) {
       });
 }
 
-//Удаление элемента
+//РЈРґР°Р»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р°
 function removeDevice(elem) {
   return elem.parentNode ? elem.parentNode.removeChild(elem) : elem;
 }
 
-//Поиск "родителя"
+//РџРµСЂРµС‚Р°СЃРєРёРІР°РЅРёРµ СЌРµР»РµРјРµРЅС‚Р°
+function divDragStart(element) {
+dragObject = element;
+var mainfield = document.getElementById("constructfield");
+//mainfield.onmousemove = divDrag();
+return false;
+}
+
+function divDrag() {
+  if (dragObject != null) {
+    //dragObject.style.left =  0 + "px";
+    //dragObject.style.top = 0 + "px";
+  };
+}
+
+function divDragFinish(element) {
+  dragObject = null;
+}
+
+
+//РџРѕРёСЃРє "СЂРѕРґРёС‚РµР»СЏ"
 function parentSearch(node) {
   for (var realParent = node; realParent.className !="constrdevice"; realParent = realParent.parentNode);
   return realParent;
 }
 
-//Перетаскивание div'а
-function divDrag(){
-  alert('Works!');
-}
-
     
- // Функция для добавления обработчиков событий, связанных с выпадающим меню
+ // Р¤СѓРЅРєС†РёСЏ РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ РѕР±СЂР°Р±РѕС‚С‡РёРєРѕРІ СЃРѕР±С‹С‚РёР№, СЃРІСЏР·Р°РЅРЅС‹С… СЃ РІС‹РїР°РґР°СЋС‰РёРј РјРµРЅСЋ
    function addHandler(object, event, handler, useCapture) {
        if (object.addEventListener) {
            object.addEventListener(event, handler, useCapture ? useCapture : false);
@@ -218,7 +239,7 @@ function divDrag(){
     });   
         
 
-//вызов функций
+//РІС‹Р·РѕРІ С„СѓРЅРєС†РёР№
 
 handleDeviceAddStart = wrapHandler(deviceAddStart);
 handleDeviceAddFinish = wrapHandler(deviceAddFinish);
@@ -229,5 +250,5 @@ window.onload = function(e) {
 		fillDevices(data);
 		loadTopology(fillTopology);
 	});
-	
+
 };
