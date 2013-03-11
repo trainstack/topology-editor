@@ -1,0 +1,58 @@
+* {margin:0; padding:0}
+body {font:11px/1.5 Verdana, Arial, Helvetica, sans-serif; background:#FFF}
+#text {margin:10px auto; width:150px}
+.hotspot {color:#900; padding-bottom:1px; border-bottom:1px; cursor:pointer}
+
+#tt {position:absolute; display:block; background:url(images/tt_left.gif) top left no-repeat}
+#tttop {display:block; height:5px; margin-left:5px; background:url(images/tt_top.gif) top right no-repeat; overflow:hidden}
+#ttcont {display:block; padding:2px 12px 3px 7px; margin-left:5px; background:#666; color:#FFF}
+#ttbot {display:block; height:5px; margin-left:5px; background:url(images/tt_bottom.gif) top right no-repeat; overflow:hidden}
+
+#devices {
+padding:10px; 
+text-align:center;
+vertical-align:middle;
+cursor: pointer;
+
+} 
+
+#constructfield {
+position: relative;
+float: right;
+width: 77%;
+text-align: center;
+height: 100%;
+vertical-align:top;
+padding:10px;
+border:2px inset #eeeeee;
+} 
+
+.constrdevice {position:absolute; text-align: center; z-index: 100;} 
+.palette_icon {height: 32; width: 32}
+.editor_icon {height: 64; width: 64}
+
+.menu {
+ position: absolute;
+ width: 160px;
+ border: 1px solid black;
+ background-color: menu;
+ font-family: Verdana;
+ line-height: 20px;
+ cursor: default;
+ font-size: 14px;
+ z-index: 99;
+ visibility: hidden;
+}
+
+.menu_items{
+ padding-left: 10px;
+ padding-right: 10px;
+}
+
+#contextMenuId {
+position:absolute;
+display:none; 
+float:left;
+}
+
+.drag { position:relative; cursor:hand; z-index: 100; } 
