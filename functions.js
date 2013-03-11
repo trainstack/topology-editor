@@ -115,8 +115,7 @@ function deviceAddFinish(ev, el) {
 	 div.style.top = mouse_y - ((sizer.clientHeight)/2) + 'px';
 	 div.style.visibility = 'visible';
   }
-  div.onmousedown = divDragStart(div);
-  div.onmouseup = divDragFinish(div);
+  div.onmousedown = wrapHandler(divDragStart);
 	device.position.x = div.style.left;
 	device.position.y = div.style.top;
 	buf = null;
@@ -200,21 +199,28 @@ function removeDevice(elem) {
 }
 
 //Перетаскивание эелемента
-function divDragStart(element) {
-dragObject = element;
-var mainfield = document.getElementById("constructfield");
-//mainfield.onmousemove = divDrag();
-return false;
+function divDragStart(event) {
+  var element = parentSearch(event.target);
+  console.log("Starting drag " + element);
+  dragObject = element;
+  var mainfield = document.getElementById("constructfield");
+  event.preventDefault();
 }
 
-function divDrag() {
-  if (dragObject != null) {
-    //dragObject.style.left =  0 + "px";
-    //dragObject.style.top = 0 + "px";
+function divDrag(e) {
+  e = e || window.event;
+  var parent = document.getElementById("constructfield");
+  var mouse_x = e.clientX - parent.offsetLeft - 32;
+  var mouse_y = e.clientY - parent.offsetTop - 32; 
+  console.log(dragObject.style.left + ' ' + dragObject.style.top);
+  if (dragObject != null) {    
+    dragObject.style.left =  mouse_x + "px";
+    dragObject.style.top = mouse_y + "px";
   };
 }
 
-function divDragFinish(element) {
+function divDragFinish() {
+  console.log("Finishing drag on element " + dragObject);
   dragObject = null;
 }
 
@@ -245,7 +251,10 @@ handleDeviceAddStart = wrapHandler(deviceAddStart);
 handleDeviceAddFinish = wrapHandler(deviceAddFinish);
 
 window.onload = function(e) {
-	document.getElementById('constructfield').onclick = handleDeviceAddFinish;
+  var constructfield = document.getElementById('constructfield');
+	constructfield.onclick = handleDeviceAddFinish;
+  constructfield.onmouseup = wrapHandler(divDragFinish);
+  constructfield.onmousemove = wrapHandler(divDrag);
 	loadHardware(function(data) {
 		fillDevices(data);
 		loadTopology(fillTopology);
