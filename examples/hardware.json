@@ -4,8 +4,8 @@
 			"id": "VM",
 			"name": "Virtual Machine",
 			"image": {
-				"thumb": { "url": "http://example.com/static/vm-32.png" },
-				"main": { "url": "http://example.com/static/vm-128.png" }
+				"thumb": { "url": "/img/vm.png" },
+				"main": { "url": "/img/vm.png" }
 			},
 			"slots": [
 				{
@@ -19,8 +19,8 @@
 			"id": "C200",
 			"name": "Cisco C2000",
 			"image": {
-				"thumb": { "url": "http://example.com/static/c2000-32.png" },
-				"main": { "url": "http://example.com/static/c2000-128.png" }
+				"thumb": { "url": "/img/router.png" },
+				"main": { "url": "/img/router.png" }
 			},
 			"slots": [
 				{
