@@ -142,22 +142,25 @@ function newDevice(proto) {
   // };
   for (var i in buf.slots) {
     for (var k in slots.cards) {
-      if (slots.cards[k].model == buf.slots[i].model) { // это условие выполняется и выполняется правильно, проверял
-        for (var m = 0; m < slots.cards[k].ports.count; m++) {
-            portsArray[m] = {
-            type: slots.cards[k].type,
-            wire: null,
-            slot_id: i,
-            id: ports.lenght
+      if (slots.cards[k].model == buf.slots[i].model) {
+        for (var n = 0; n < slots.cards[k].ports.length; n++ ) {
+          for (var m = 0; m < slots.cards[k].ports[n].count; m++) {
+               portsArray[m] = {
+               type: slots.cards[k].ports[n].type,
+               wire: null,
+               slot_id: i,
+               id: portsArray.length
+              }
+              slotsArray[i] = {
+              id: i,
+              model: buf.slots[i].model,
+              ports: portsArray
+            }
           }
-        }
+        } 
       }
     }
-      slotsArray[i] = {
-      id: i,
-      model: buf.slots[i].model,
-      ports: portsArray
-    }
+
   }
   var device = {
     id: deviceId,
@@ -234,22 +237,25 @@ function defPosition(event) {
 
 //выпадающее меню при правом клике на устройство
 menuevent = function(event) {
+      var portsList = '';
       var goalDevice = parentSearch(event.target);
       var necessaryDevice = deviceArray[goalDevice.id];
       console.log(necessaryDevice); 
-      console.log(necessaryDevice.slots[0].model);
       event = event || window.event;
       event.preventDefault ? event.preventDefault() : event.returnValue = false; 
       var menu = document.getElementById("contextMenuId");
       var html = "";
       for (var i in necessaryDevice.slots) {
-      html += 
-      '<li class="dropdown-submenu">' + 
+        for (var m in necessaryDevice.slots[i].ports) {
+          portsList += '<li>' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</li>';
+        }
+        html += 
+        '<li class="dropdown-submenu">' + 
         '<a tabindex="-1" href="#">' + necessaryDevice.slots[i].model + '</a>'+
         '<ul class="dropdown-menu">' +
-          '<li>Port</li> '+
+        portsList +
         '</ul>' +
-      '</li>';
+        '</li>';
         }
       html += '<li class="divider"></li>';
       html += '<li><a tabindex="-1" href="#" class="js-get-html-rename"> Переименовать </a></li>';
