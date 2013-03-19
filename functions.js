@@ -237,17 +237,20 @@ menuevent = function(event) {
       var goalDevice = parentSearch(event.target);
       var necessaryDevice = deviceArray[goalDevice.id];
       console.log(necessaryDevice); 
+      console.log(necessaryDevice.slots[0].model);
       event = event || window.event;
       event.preventDefault ? event.preventDefault() : event.returnValue = false; 
       var menu = document.getElementById("contextMenuId");
       var html = "";
-      html = 
+      for (var i in necessaryDevice.slots) {
+      html += 
       '<li class="dropdown-submenu">' + 
-        '<a tabindex="-1" href="#"> Порты слоты </a>'+
+        '<a tabindex="-1" href="#">' + necessaryDevice.slots[i].model + '</a>'+
         '<ul class="dropdown-menu">' +
-          '<li>ololo</li> '+
+          '<li>Port</li> '+
         '</ul>' +
       '</li>';
+        }
       html += '<li class="divider"></li>';
       html += '<li><a tabindex="-1" href="#" class="js-get-html-rename"> Переименовать </a></li>';
       html += '<li class="divider"></li>';
