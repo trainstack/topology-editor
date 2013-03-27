@@ -6,7 +6,10 @@ var menuevent = null;
 var dragObject = null;
 var mainfield = null;
 var renaming = false;
-var deviceArray = {}; 
+var deviceArray = {};
+var connectObject1 = null; 
+var connectObject2 = null; 
+var paper = null;
 
 var config = {
 	api_endpoint: '/examples/' // default for dev environment
@@ -16,7 +19,6 @@ var config = {
 function parseJson(jsonString) {
 	return eval('(' + jsonString + ')');
 }
-
 
 //парсинг hardware.json
 function loadHardware(callback) {
@@ -117,7 +119,7 @@ function getFreeId(){
 //   ]
 // }
 
-
+//Добавление нового устройства, начало
 function newDevice(proto) {
 	var deviceId = 'device_' + getFreeId();
   if (proto != null) {var devnum = proto.name};
@@ -140,7 +142,7 @@ function newDevice(proto) {
   //       }
   //     } 
   // };
-  for (var i in buf.slots) {
+  if (buf != null) {for (var i in buf.slots) {
     for (var k in slots.cards) {
       if (slots.cards[k].model == buf.slots[i].model) {
         for (var n = 0; n < slots.cards[k].ports.length; n++ ) {
@@ -161,7 +163,7 @@ function newDevice(proto) {
         } 
       }
     }
-
+}
   }
   var device = {
     id: deviceId,
@@ -174,14 +176,14 @@ function newDevice(proto) {
   console.log(device); 
 }
 
-//щелчки 
-
+//щелчки
 function deviceAddStart(ev, el) {
 	var elid = el.id;
 	var temp = elid.split("_");
 	buf = hardware.devices[temp[1]];
 }
 
+//Добавление нового устройства, завершение
 function deviceAddFinish(ev, el) {
 	var parent = document.getElementById("constructfield");
 	var mouse_x = ev.clientX - parent.offsetLeft;
@@ -249,11 +251,11 @@ menuevent = function(event) {
       for (var i in necessaryDevice.slots) {
         portsList = '';
         for (var m in necessaryDevice.slots[i].ports) {
-          portsList += '<li>' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</li>';
+          portsList += '<li><a tabindex = "-1" href="#" class="js-port-connect" >' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</a></li>';
         }
         html += 
         '<li class="dropdown-submenu">' + 
-        '<a tabindex="-1" href="#">' + necessaryDevice.slots[i].model + '</a>'+
+        '<a tabindex="-1" href="#" >' + necessaryDevice.slots[i].model + '</a>'+
         '<ul class="dropdown-menu">' +
         portsList +
         '</ul>' +
@@ -272,12 +274,61 @@ menuevent = function(event) {
         var parent = parentSearch(event.target);
         removeDevice(parent);
       });
+      $(".js-port-connect").on('click', function() {
+        var parent = parentSearch(event.target);
+        portConnectStart(parent);
+      });      
       menu.style.top = defPosition(event).y + 'px';
       menu.style.left = defPosition(event).x + 'px';
       menu.style.display = '';
 	   if (renaming == false) {document.getElementById("contextMenuId").style.display = "block"};
 };
 
+
+//Соединение устройств
+function portConnectStart(elem) { 
+if (connectObject1 == null)  {connectObject1 = elem; return false;};
+if (connectObject1 != null) {
+    connectObject2 = elem;
+    var constructfield = document.getElementById('constructfield');
+    var x1 = connectObject1.style.left.split('p');
+    var x1 = parseInt(x1[0]) + 32;
+    var y1 = connectObject1.style.top.split('p');
+    var y1 = parseInt(y1[0]) + 32;
+    var x2 = connectObject2.style.left.split('p');
+    var x2 = parseInt(x2[0]) + 32;
+    var y2 = connectObject2.style.top.split('p');
+    var y2 = parseInt(y2[0]) + 32;
+    console.log(x1, y1, x2, y2);
+    // var newsvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    // newsvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    // newsvg.setAttribute('id', 'newsvg');
+    // newsvg.setAttribute('height', 200);
+    // newsvg.setAttribute('width', 200);
+    // newsvg.setAttribute('style', 'position: absolute; left: 100px; top: 100px; overflow: hidden');
+
+    var svg = document.getElementById('svg'); 
+    var newpath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    // var newpath = document.createElementNS('http://www.w3.org/2000/svg','line');
+    var newdefs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    newpath.setAttribute('d', 'M' + x1 + ',' + y1 + 'L' + x2 + ',' + y2 + 'Z');
+    
+    // newpath.setAttribute('x1', x1);
+    // newpath.setAttribute('y1', y1);
+    // newpath.setAttribute('x2', x2);
+    // newpath.setAttribute('y2', y2);
+
+    newpath.setAttribute('stroke', '#000000');
+    newpath.setAttribute('style', '');
+    newpath.setAttribute('fill', 'none');
+    svg.appendChild(newdefs);
+    svg.appendChild(newpath);
+    connectObject1 = null;
+    connectObject2 = null; 
+    // var paper = Raphael(x1, y1, x2, y2);
+    // var newpath = paper.path('"M' + x1 +' ' + y1 + ' L ' + x2 + ' ' + y2 + 'Z"');
+  }
+};
 
 //Переименование элемента
 function renameDevice(elem) {
@@ -305,12 +356,8 @@ function removeDevice(elem) {
   return elem.parentNode ? elem.parentNode.removeChild(elem) : elem;
 }
 
-//Определение слотов и портов элемента
-function portsSlotsDefinition() {
-  console.log('ololo');
-}
-
 //Перетаскивание эелемента
+//Начало
 function divDragStart(event) {
   if (renaming == true) {return false}
     else {
@@ -321,6 +368,7 @@ function divDragStart(event) {
       };
 }
 
+//Середина
 function divDrag(e) {
   e = e || window.event;
   var parent = document.getElementById("constructfield");
@@ -334,6 +382,7 @@ function divDrag(e) {
   };
 }
 
+//Конец
 function divDragFinish() {
   dragObject = null;
 }
@@ -366,6 +415,7 @@ handleDeviceAddFinish = wrapHandler(deviceAddFinish);
 
 window.onload = function(e) {
   var constructfield = document.getElementById('constructfield');
+  console.log(constructfield);
 	constructfield.onclick = handleDeviceAddFinish;
   constructfield.onmouseup = wrapHandler(divDragFinish);
   constructfield.onmousemove = wrapHandler(divDrag);

@@ -1,6 +1,6 @@
 ﻿<html>
 <head>
-<link rel="stylesheet" href="drag.css" type="text/css" />
+<!--<link rel="stylesheet" href="drag.css" type="text/css" />-->
 <link rel="stylesheet" type="text/css" href="style.css" />
 <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
 <link rel="stylesheet" type="text/css" href="bootstrap.min.css"/>
@@ -8,10 +8,11 @@
 <link rel="stylesheet" type="text/css" href="bootstrap-responsive.min.css"/>
 <script language="JavaScript" type="text/javascript" src="jquery-183.js"></script> <!--Библиотека jquery -->
 <script type="text/javascript" src="functions.js"></script> <!-- Код javascript -->
+<script type="text/javascript" src="raphael.js"></script> <!-- Библиотека для прорисовки SVG -->
 
 </head>
 
-<body>
+<body id='body'>
 
 
 
@@ -19,7 +20,7 @@
 <div visbility="hidden" position="absolute"
 	style="margin: 0 auto; width: 100%;">
 
-<div id="aviabledevices" style="float: left; width: 20%;">
+<div id="aviabledevices" style="float: left; width: 20%">
 <table id="devices" class="table table-striped">
 
 	<tr>
@@ -27,9 +28,9 @@
 	</tr>
 </table>
 </div>
-
 <div id="constructfield" class="table table-bordered"> <!-- Поле конструктора -->
-<div class="dropdown"><ul id="contextMenuId" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"></ul></div> <!-- Выпадающее меню -->
+<svg id="svg" position="relative" style="float: left; width: 100% heigth: 100%"></svg> 	
+<div class="dropdown"><ul id="contextMenuId" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"></ul></div> <!--Выпадающее меню -->
 </div>
 </FONT>
 </body>
