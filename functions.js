@@ -10,6 +10,7 @@ var deviceArray = {};
 var connectObject1 = null; 
 var connectObject2 = null; 
 var paper = null;
+var wires ={};
 
 var config = {
 	api_endpoint: '/examples/' // default for dev environment
@@ -96,7 +97,7 @@ function wrapHandler(f) {
 	};
 }
 
-//конуструтор
+//поиск свободного id для устройств
 function getFreeId(){
 	for (var i=0; i<100; i++) {
 		if (!document.getElementById('device_' + i)) break; 
@@ -251,7 +252,8 @@ menuevent = function(event) {
       for (var i in necessaryDevice.slots) {
         portsList = '';
         for (var m in necessaryDevice.slots[i].ports) {
-          portsList += '<li><a tabindex = "-1" href="#" class="js-port-connect" >' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</a></li>';
+          if (necessaryDevice.slots[i].ports[m].wire == null) { portsList += '<li type="circle"><a tabindex = "-1" href="#" class="js-port-connect" >' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</a></li>'}
+          else { portsList += '<li type="disc"><a tabindex = "-1" href="#" class="js-port-connect" >' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</a></li>'};
         }
         html += 
         '<li class="dropdown-submenu">' + 
@@ -284,12 +286,54 @@ menuevent = function(event) {
 	   if (renaming == false) {document.getElementById("contextMenuId").style.display = "block"};
 };
 
+//поиск свободного id для проводов
+function getFreeWireId(){
+  for (var i=0; i<100; i++) {
+    if (!document.getElementById('wire_' + i)) break; 
+  }
+  return (i);
+} 
+
+//поиск свободного id для линий
+function getFreePathId(){
+  for (var i=0; i<100; i++) {
+    if (!document.getElementById('path_' + i)) break; 
+  }
+  return (i);
+}
+
+//Прорисовка проводов
+function wireRendering() {
+  for (i = 0; i < 100; i++) {
+    var constructfield = document.getElementById('constructfield');
+    var x1 = wires[i].left.style.left.split('p');
+    var x1 = parseInt(x1[0]) + 32;
+    var y1 = wires[i].left.style.top.split('p');
+    var y1 = parseInt(y1[0]) + 32;
+    var x2 = wires[i].right.style.left.split('p');
+    var x2 = parseInt(x2[0]) + 32;
+    var y2 = wires[i].right.style.top.split('p');
+    var y2 = parseInt(y2[0]) + 32;
+    var path = document.getElementById('path_' + i);
+    path.setAttribute('d', 'M' + x1 + ',' + y1 + 'L' + x2 + ',' + y2 + 'Z');
+  };
+}
 
 //Соединение устройств
 function portConnectStart(elem) { 
 if (connectObject1 == null)  {connectObject1 = elem; return false;};
 if (connectObject1 != null) {
     connectObject2 = elem;
+    var wireId = 'wire_' + getFreeWireId();
+    wires[length] = {
+      id: wireId,
+      left: connectObject1,
+      right: connectObject2
+    };
+    for (i = 0; i < deviceArray[length]; i++) {
+      if (deviceArray[i].id == connectObject1.id) {};
+    }
+
     var constructfield = document.getElementById('constructfield');
     var x1 = connectObject1.style.left.split('p');
     var x1 = parseInt(x1[0]) + 32;
@@ -299,25 +343,13 @@ if (connectObject1 != null) {
     var x2 = parseInt(x2[0]) + 32;
     var y2 = connectObject2.style.top.split('p');
     var y2 = parseInt(y2[0]) + 32;
-    console.log(x1, y1, x2, y2);
-    // var newsvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    // newsvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    // newsvg.setAttribute('id', 'newsvg');
-    // newsvg.setAttribute('height', 200);
-    // newsvg.setAttribute('width', 200);
-    // newsvg.setAttribute('style', 'position: absolute; left: 100px; top: 100px; overflow: hidden');
+
 
     var svg = document.getElementById('svg'); 
     var newpath = document.createElementNS('http://www.w3.org/2000/svg','path');
-    // var newpath = document.createElementNS('http://www.w3.org/2000/svg','line');
     var newdefs = document.createElementNS('http://www.w3.org/2000/svg','defs');
     newpath.setAttribute('d', 'M' + x1 + ',' + y1 + 'L' + x2 + ',' + y2 + 'Z');
-    
-    // newpath.setAttribute('x1', x1);
-    // newpath.setAttribute('y1', y1);
-    // newpath.setAttribute('x2', x2);
-    // newpath.setAttribute('y2', y2);
-
+    newpath.setAttribute('id', 'path_' + getFreePathId());
     newpath.setAttribute('stroke', '#000000');
     newpath.setAttribute('style', '');
     newpath.setAttribute('fill', 'none');
@@ -325,10 +357,19 @@ if (connectObject1 != null) {
     svg.appendChild(newpath);
     connectObject1 = null;
     connectObject2 = null; 
-    // var paper = Raphael(x1, y1, x2, y2);
-    // var newpath = paper.path('"M' + x1 +' ' + y1 + ' L ' + x2 + ' ' + y2 + 'Z"');
+
+  //для Raphaёl
+    x1 = x1 + constructfield.offsetLeft;
+    y1 = y1 + constructfield.offsetTop;
+    x2 = x2 + constructfield.offsetLeft;
+    y2 = y2 + constructfield.offsetTop;
+    var paper = Raphael(x1, y1, x2, y2);
+    var newpath = paper.path('"M' + x1 +' ' + y1 + ' L ' + x2 + ' ' + y2 + 'Z"');
+
+    wireRendering().initialize; 
   }
 };
+
 
 //Переименование элемента
 function renameDevice(elem) {
@@ -380,6 +421,7 @@ function divDrag(e) {
     var tester = 0 + "px"; 
     if (dragObject.style.left < (0 + "px")) {dragObject.style.left =  0 + "px"; };
   };
+  wireRendering().initialize; 
 }
 
 //Конец
