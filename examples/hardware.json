@@ -3,9 +3,11 @@
 		"VM": {
 			"id": "VM",
 			"name": "Virtual Machine",
-			"image": {
-				"thumb": { "url": "/img/vm.png" },
-				"main": { "url": "/img/vm.png" }
+			"metadata": {
+				"image": {
+					"thumb": { "url": "/img/vm.png" },
+					"main": { "url": "/img/vm.png" }
+				}
 			},
 			"slots": [
 				{
@@ -16,11 +18,13 @@
 			]
 		},
 		"C2000": {
-			"id": "C200",
+			"id": "C2000",
 			"name": "Cisco C2000",
-			"image": {
-				"thumb": { "url": "/img/router.png" },
-				"main": { "url": "/img/router.png" }
+			"metadata": {
+				"image": {
+					"thumb": { "url": "/img/router.png" },
+					"main": { "url": "/img/router.png" }
+				}
 			},
 			"slots": [
 				{

@@ -1,13 +1,13 @@
 {
 	"devices": [
 		{
-			"id": "R1",
+			"id": "device_0",
 			"name": "Router 1",
 			"hardware": "C2000",
 			"slots": [
 				{
 					"id": 0,
-					"model": "S2000",
+					"model": "E2000",
 					"editable": false
 				},
 				{
@@ -22,13 +22,15 @@
 				}
 			],
 			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/R1.html",
-			"position": {
-				"x": 123,
-				"y": 100
+			"metadata": {
+				"position": {
+					"x": 123,
+					"y": 100
+				}
 			}
 		},
 		{
-			"id": "R2",
+			"id": "device_1",
 			"name": "Computer",
 			"hardware": "VM",
 			"slots": [
@@ -39,16 +41,19 @@
 				}
 			],
 			"ajaxterm-url": "http://example.com/users/vasya/app/mynet/M1.html",
-			"position": {
-				"x": 200,
-				"y": 200
+			"metadata": {
+				"position": {
+					"x": 200,
+					"y": 200
+				}
 			}
 		}
 	],
 	"wires": [
 	    {
-	    	"left": {"device": "R1", "slot": 0, "port": 0},
-	    	"right": {"device": "R2", "slot": 0, "port": 0}
+	    	"id": "wire_0",
+	    	"left": {"device": "device_0", "slot": 0, "port": 0},
+	    	"right": {"device": "device_1", "slot": 0, "port": 0}
 	    }
 	]
 }
