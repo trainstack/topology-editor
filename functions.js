@@ -1,20 +1,27 @@
-﻿var hardware = null;
+var hardware = null;
+var slots = null;
 var topology = null;
 var buf = null;
 var menuevent = null;
 var dragObject = null;
-var mainfield = null;  
-
+var mainfield = null;
+var renaming = false;
+var deviceArray = {};
+var connectObject1 = null; 
+var connectObject2 = null; 
+var paper = null;
+var wires ={};
 
 var config = {
 	api_endpoint: '/examples/' // default for dev environment
-
 };
 
+//функция для парсинга
 function parseJson(jsonString) {
 	return eval('(' + jsonString + ')');
 }
 
+//парсинг hardware.json
 function loadHardware(callback) {
 	var newXHR = new XMLHttpRequest();
 	newXHR.open('GET', config.api_endpoint + 'hardware.json');
@@ -27,6 +34,20 @@ function loadHardware(callback) {
 	newXHR.send(null);
 }
 
+//парсинг slots.json
+function loadSlots(callback) {
+  var newXHR = new XMLHttpRequest();
+  newXHR.open('GET', config.api_endpoint + 'slots.json');
+  newXHR.onreadystatechange = function() {
+    if (newXHR.readyState == 4) {
+      var resp = parseJson(newXHR.responseText);
+      callback(resp);
+    }
+  };
+  newXHR.send(null); 
+}
+
+//загрузка топологии
 function loadTopology(callback) {
 	var mock = {
 		devices: [],
@@ -35,6 +56,7 @@ function loadTopology(callback) {
 	callback(mock);
 }
 
+//заполнение списка устройств
 function fillDevices(data) {
 	hardware = data; 
 	var devicesList = document.getElementById('devices');
@@ -53,11 +75,20 @@ function fillDevices(data) {
 	}
 }
 
+// заполнение списка слотов 
+function fillSlots(data) {
+  slots = data; 
+  console.log(slots);
+}
+
+
+//заполнение топологии
 function fillTopology(data) {
 	topology = data;
 	// render data here...
 }
 
+//хендлер щелчка 
 function wrapHandler(f) {
 	return function(e) {
 		var ev = window.event ? window.event : e;
@@ -66,7 +97,7 @@ function wrapHandler(f) {
 	};
 }
 
-//конуструтор
+//поиск свободного id для устройств
 function getFreeId(){
 	for (var i=0; i<100; i++) {
 		if (!document.getElementById('device_' + i)) break; 
@@ -74,30 +105,91 @@ function getFreeId(){
 	return (i);
 }	
 
-function newDevice() {
-	var id = getFreeId();
-	var devnum = id + 1;
-	var device = {
-			name: 'Device ' + devnum, 
-			id: 'device_' + id,
-			position:  {"x":-1, "y":-1}
-	};
-    return device; 	
+// {
+//   id: "device_1",
+//   name: "VM 1",
+//   position: {x: 1, y: 2},
+//   slots: [
+//     {
+//       id: 0,
+//       model: "Realtek",
+//       ports: [
+//         {type: "Ethernet", wire: null, slot_id: 0, id: 0}
+//       ]
+//     }
+//   ]
+// }
+
+//Добавление нового устройства, начало
+function newDevice(proto) {
+	var deviceId = 'device_' + getFreeId();
+  if (proto != null) {var devnum = proto.name};
+  var slotsArray = [];
+  var portsArray = [];
+  // for (var i = 0; i < slots.cards.length; i++) { 
+  //     slotsArray[i] = {
+  //       id: i,
+  //       model: slots.cards[i].model
+  //     }
+  //     ports = [];
+  //     for (var k=0; k<slots.cards[i].ports.length; k++) {
+  //       for (var m=0; m < slots.cards[i].ports[k].count; m++) {
+  //         ports[ports.length] = {
+  //           type: slots.cards[i].ports[k].type,
+  //           wire: null,
+  //           slot_id: i,
+  //           id: ports.length
+  //         }
+  //       }
+  //     } 
+  // };
+  if (buf != null) {for (var i in buf.slots) {
+    for (var k in slots.cards) {
+      if (slots.cards[k].model == buf.slots[i].model) {
+        for (var n = 0; n < slots.cards[k].ports.length; n++ ) {
+          portsArray = [];
+          for (var m = 0; m < slots.cards[k].ports[n].count; m++) {
+               portsArray[m] = {
+               type: slots.cards[k].ports[n].type,
+               wire: null,
+               slot_id: i,
+               id: portsArray.length
+              }
+              slotsArray[i] = {
+              id: i,
+              model: buf.slots[i].model,
+              ports: portsArray
+              }
+          }
+        } 
+      }
+    }
+}
+  }
+  var device = {
+    id: deviceId,
+    name: devnum,
+    position: {x: 0, y: 0},
+    slots: slotsArray
+  };
+  deviceArray[deviceId] = device; 
+  return device;
+  console.log(device); 
 }
 
-//щелчки 
-
+//щелчки
 function deviceAddStart(ev, el) {
 	var elid = el.id;
 	var temp = elid.split("_");
 	buf = hardware.devices[temp[1]];
 }
 
+//Добавление нового устройства, завершение
 function deviceAddFinish(ev, el) {
 	var parent = document.getElementById("constructfield");
 	var mouse_x = ev.clientX - parent.offsetLeft;
 	var mouse_y = ev.clientY - parent.offsetTop;
-	var device = newDevice();
+	var device = newDevice(buf);
 	var div = document.createElement( "div" );
 	div.id = device.id;
 	div.className = 'constrdevice';
@@ -149,32 +241,139 @@ function defPosition(event) {
 
 //выпадающее меню при правом клике на устройство
 menuevent = function(event) {
+      var portsList = '';
+      var goalDevice = parentSearch(event.target);
+      var necessaryDevice = deviceArray[goalDevice.id];
+      console.log(necessaryDevice); 
       event = event || window.event;
       event.preventDefault ? event.preventDefault() : event.returnValue = false; 
       var menu = document.getElementById("contextMenuId");
       var html = "";
-      html = '<li><a tabindex="-1" href="#" class="js-get-html-rename"> Переименовать </a></li>';
-      html += '<br><li><a tabindex="-1" href="#" class="js-get-html-remove"> Удалить </a></li>';
+      for (var i in necessaryDevice.slots) {
+        portsList = '';
+        for (var m in necessaryDevice.slots[i].ports) {
+          if (necessaryDevice.slots[i].ports[m].wire == null) { portsList += '<li type="circle"><a tabindex = "-1" href="#" class="js-port-connect" >' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</a></li>'}
+          else { portsList += '<li type="disc"><a tabindex = "-1" href="#" class="js-port-connect" >' + necessaryDevice.slots[i].ports[m].type + ' ' + (necessaryDevice.slots[i].ports[m].id + 1) + '</a></li>'};
+        }
+        html += 
+        '<li class="dropdown-submenu">' + 
+        '<a tabindex="-1" href="#" >' + necessaryDevice.slots[i].model + '</a>'+
+        '<ul class="dropdown-menu">' +
+        portsList +
+        '</ul>' +
+        '</li>';
+        }
+      html += '<li class="divider"></li>';
+      html += '<li><a tabindex="-1" href="#" class="js-get-html-rename"> Переименовать </a></li>';
+      html += '<li class="divider"></li>';
+      html += '<li><a tabindex="-1" href="#" class="js-get-html-remove"> Удалить </a></li>';
       menu.innerHTML = html;
       $(".js-get-html-rename").on('click', function() {
-        console.log(event);
         var parent = parentSearch(event.target);
-        renameDevice(parent);        
+        renameDevice(parent);     
       });
       $(".js-get-html-remove").on('click', function() {
-        console.log(event);
         var parent = parentSearch(event.target);
         removeDevice(parent);
+      });
+      $(".js-port-connect").on('click', function() {
+        var parent = parentSearch(event.target);
+        portConnectStart(parent);
       });      
       menu.style.top = defPosition(event).y + 'px';
       menu.style.left = defPosition(event).x + 'px';
       menu.style.display = '';
-	   document.getElementById("contextMenuId").style.display = "block";
+	   if (renaming == false) {document.getElementById("contextMenuId").style.display = "block"};
+};
+
+//поиск свободного id для проводов
+function getFreeWireId(){
+  for (var i=0; i<100; i++) {
+    if (!document.getElementById('wire_' + i)) break; 
+  }
+  return (i);
+} 
+
+//поиск свободного id для линий
+function getFreePathId(){
+  for (var i=0; i<100; i++) {
+    if (!document.getElementById('path_' + i)) break; 
+  }
+  return (i);
+}
+
+//Прорисовка проводов
+function wireRendering() {
+  for (i = 0; i < 100; i++) {
+    var constructfield = document.getElementById('constructfield');
+    var x1 = wires[i].left.style.left.split('p');
+    var x1 = parseInt(x1[0]) + 32;
+    var y1 = wires[i].left.style.top.split('p');
+    var y1 = parseInt(y1[0]) + 32;
+    var x2 = wires[i].right.style.left.split('p');
+    var x2 = parseInt(x2[0]) + 32;
+    var y2 = wires[i].right.style.top.split('p');
+    var y2 = parseInt(y2[0]) + 32;
+    var path = document.getElementById('path_' + i);
+    path.setAttribute('d', 'M' + x1 + ',' + y1 + 'L' + x2 + ',' + y2 + 'Z');
+  };
+}
+
+//Соединение устройств
+function portConnectStart(elem) { 
+if (connectObject1 == null)  {connectObject1 = elem; return false;};
+if (connectObject1 != null) {
+    connectObject2 = elem;
+    var wireId = 'wire_' + getFreeWireId();
+    wires[length] = {
+      id: wireId,
+      left: connectObject1,
+      right: connectObject2
+    };
+    for (i = 0; i < deviceArray[length]; i++) {
+      if (deviceArray[i].id == connectObject1.id) {};
+    }
+
+    var constructfield = document.getElementById('constructfield');
+    var x1 = connectObject1.style.left.split('p');
+    var x1 = parseInt(x1[0]) + 32;
+    var y1 = connectObject1.style.top.split('p');
+    var y1 = parseInt(y1[0]) + 32;
+    var x2 = connectObject2.style.left.split('p');
+    var x2 = parseInt(x2[0]) + 32;
+    var y2 = connectObject2.style.top.split('p');
+    var y2 = parseInt(y2[0]) + 32;
+
+
+    var svg = document.getElementById('svg'); 
+    var newpath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    var newdefs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    newpath.setAttribute('d', 'M' + x1 + ',' + y1 + 'L' + x2 + ',' + y2 + 'Z');
+    newpath.setAttribute('id', 'path_' + getFreePathId());
+    newpath.setAttribute('stroke', '#000000');
+    newpath.setAttribute('style', '');
+    newpath.setAttribute('fill', 'none');
+    svg.appendChild(newdefs);
+    svg.appendChild(newpath);
+    connectObject1 = null;
+    connectObject2 = null; 
+
+  //для Raphaёl
+    x1 = x1 + constructfield.offsetLeft;
+    y1 = y1 + constructfield.offsetTop;
+    x2 = x2 + constructfield.offsetLeft;
+    y2 = y2 + constructfield.offsetTop;
+    var paper = Raphael(x1, y1, x2, y2);
+    var newpath = paper.path('"M' + x1 +' ' + y1 + ' L ' + x2 + ' ' + y2 + 'Z"');
+
+    wireRendering().initialize; 
+  }
 };
 
 
 //Переименование элемента
 function renameDevice(elem) {
+      renaming = true; 
       var div = $(elem);
       var p = div.find("p");
       p.hide();
@@ -182,13 +381,13 @@ function renameDevice(elem) {
           "<input type='text' class='js-edit' style='width: 96; height: 28;'>"
       );
       var edit = div.find(".js-edit");
-      edit.keydown(function(e) {   
-          console.log(e.keyCode);     
+      edit.keydown(function(e) {      
           if (e.keyCode == 13) {
               e.preventDefault();
               p.text(edit.val());           
               edit.remove();
               p.show();
+              renaming = false; 
           }
       });
 }
@@ -199,28 +398,34 @@ function removeDevice(elem) {
 }
 
 //Перетаскивание эелемента
+//Начало
 function divDragStart(event) {
-  var element = parentSearch(event.target);
-  console.log("Starting drag " + element);
-  dragObject = element;
-  var mainfield = document.getElementById("constructfield");
-  event.preventDefault();
+  if (renaming == true) {return false}
+    else {
+        var element = parentSearch(event.target);
+        dragObject = element;
+        var mainfield = document.getElementById("constructfield");
+        event.preventDefault();
+      };
 }
 
+//Середина
 function divDrag(e) {
   e = e || window.event;
   var parent = document.getElementById("constructfield");
   var mouse_x = e.clientX - parent.offsetLeft - 32;
-  var mouse_y = e.clientY - parent.offsetTop - 32; 
-  console.log(dragObject.style.left + ' ' + dragObject.style.top);
-  if (dragObject != null) {    
+  var mouse_y = e.clientY - parent.offsetTop - 32;  
+  if (dragObject != null)  {    
     dragObject.style.left =  mouse_x + "px";
     dragObject.style.top = mouse_y + "px";
+    var tester = 0 + "px"; 
+    if (dragObject.style.left < (0 + "px")) {dragObject.style.left =  0 + "px"; };
   };
+  wireRendering().initialize; 
 }
 
+//Конец
 function divDragFinish() {
-  console.log("Finishing drag on element " + dragObject);
   dragObject = null;
 }
 
@@ -252,6 +457,7 @@ handleDeviceAddFinish = wrapHandler(deviceAddFinish);
 
 window.onload = function(e) {
   var constructfield = document.getElementById('constructfield');
+  console.log(constructfield);
 	constructfield.onclick = handleDeviceAddFinish;
   constructfield.onmouseup = wrapHandler(divDragFinish);
   constructfield.onmousemove = wrapHandler(divDrag);
@@ -259,5 +465,8 @@ window.onload = function(e) {
 		fillDevices(data);
 		loadTopology(fillTopology);
 	});
+  loadSlots(function(data) {
+    fillSlots(data);
+  });
 
 };

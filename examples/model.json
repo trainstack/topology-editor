@@ -46,5 +46,9 @@
 		}
 	],
 	"wires": [
+	    {
+	    	"left": {"device": "R1", "slot": 0, "port": 0},
+	    	"right": {"device": "R2", "slot": 0, "port": 0}
+	    }
 	]
 }
